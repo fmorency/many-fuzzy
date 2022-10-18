@@ -1,4 +1,4 @@
-use crate::fuzz::generators::UintGenerator;
+use crate::fuzz::generators::{BstrGenerator, UintGenerator};
 use crate::fuzz::FuzzGenerator;
 use std::ops::Bound;
 
@@ -15,7 +15,7 @@ peg::parser! {
         / _ "in" _ "..=" m:(number()) { (Bound::Unbounded, Bound::Included(m)) }
         / _ "in" _ n:(number()) ".." { (Bound::Included(n), Bound::Unbounded) }
 
-    pub(crate) rule generator() -> Box<impl FuzzGenerator>
+    rule match_integer() -> Box<impl FuzzGenerator>
         = "uint" r:(range_u64())? {
             let r = r.unwrap_or((Bound::Unbounded, Bound::Unbounded));
             let min = match r.0 {
@@ -43,5 +43,14 @@ peg::parser! {
         / "u64" {
             Box::new(UintGenerator { min: 0, max: u64::MAX })
         }
+
+    rule match_bstr() -> Box<impl FuzzGenerator>
+        = "bstr" {
+            Box::new(BstrGenerator)
+        }
+
+    pub(crate) rule generator() -> Box<impl FuzzGenerator>
+        = match_integer() /
+          match_bstr()
     }
 }

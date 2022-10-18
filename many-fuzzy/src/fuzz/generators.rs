@@ -21,3 +21,20 @@ impl fuzz::FuzzGenerator for UintGenerator {
         format!("{}", self.gen(rng))
     }
 }
+
+pub struct BstrGenerator;
+
+impl BstrGenerator {
+    fn gen<R>(&self, rng: &mut R) -> [u8; 32]
+        where
+            R: rand::Rng,
+    {
+        rng.gen()
+    }
+}
+
+impl fuzz::FuzzGenerator for BstrGenerator {
+    fn fuzz<Rng: rand::Rng>(&mut self, rng: &mut Rng) -> String {
+        format!("h'{}'", hex::encode(self.gen(rng)))
+    }
+}
